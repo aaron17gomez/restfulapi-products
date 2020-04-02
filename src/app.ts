@@ -1,6 +1,7 @@
 import express,{Application} from "express";
 
 import {MainController} from "./controllers/main.controller";
+import {ProveedorController} from "./controllers/proveedor.controller";
 
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -13,11 +14,14 @@ config({ path: resolve(__dirname, "../.env") });
 class App{
     public app: Application;
     public mainController: MainController;
+    public proveedorController: ProveedorController;
+
     constructor(){        
         this.app = express();
         this.setConfig();
         this.setMongoDBConfig();
-        this.mainController = new MainController(this.app);
+        this.mainController = new MainController(this.app);        
+        this.proveedorController = new ProveedorController(this.app);
     }
     private setConfig(){
         this.app.use(bodyParser.json({limit:"50mb"}));
