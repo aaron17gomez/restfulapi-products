@@ -18,6 +18,7 @@ class App{
 
     constructor(){        
         this.app = express();
+        
         this.setConfig();
         this.setMongoDBConfig();
         this.mainController = new MainController(this.app);        

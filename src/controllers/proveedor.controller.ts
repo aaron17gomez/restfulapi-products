@@ -16,8 +16,5 @@ export class ProveedorController{
         .get(this.prov_service.GetById)
         .put(this.prov_service.Update)
         .delete(this.prov_service.Delete);
-        
-        
-
     }
 }

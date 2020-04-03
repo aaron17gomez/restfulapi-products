@@ -1,9 +1,34 @@
 import {Request,Response} from "express";
 import {Proveedor, IProveedor} from "../models/proveedor.model";
 import { MongooseDocument } from "mongoose";
+import {Producto,IProducts} from "../models/product.model";
+import { resolve } from "dns";
 
+class ProveedorHelpers{
+    GetProveedor(id_prov: string):Promise<IProveedor>{        
+        return new Promise<IProveedor>( (resolve,rejects) => {
+            Proveedor.findById(id_prov,(err:Error,proveedor:IProveedor)=>{
+                if(err){
+                    rejects(new Error("ops!"))
+                }
+                resolve(proveedor);
+            }); 
+        });
+    }
 
-export class ProveedorService{
+    NumberOfProductsBySupplier(prov: IProveedor):Promise<number>{
+        console.log(prov._id);
+        return new Promise<number>( resolve => {
+            Producto.aggregate([
+                { "$match": { "proveedor": prov._id }}                
+              ],(err:Error, data:any)=>{
+                resolve(data.length);
+              }) 
+        });
+    }
+}
+
+export class ProveedorService extends ProveedorHelpers{
 
     public getAll(req: Request,res: Response){
         Proveedor.find({},(err: Error, proveedores: MongooseDocument)=>{
@@ -12,16 +37,13 @@ export class ProveedorService{
             }
             res.status(200).json(proveedores);
         });
+    }   
+
+    public async GetById(req: Request,res: Response){        
+        const my_prov = await super.GetProveedor(req.params.id_prov);
+        res.status(200).send(my_prov);
     }
 
-    public GetById(req: Request,res: Response){
-        Proveedor.findById(req.params.id_prov,(err:Error,proveedor:IProveedor)=>{
-            if(err){
-                res.status(401).send(err);
-            }
-            res.status(200).json(proveedor? proveedor : {} );
-        });
-    }
     //Payload
     public Update(req: Request,res: Response){
         console.log("entro");
@@ -33,13 +55,25 @@ export class ProveedorService{
         })
     }
 
-    public Delete(req: Request, res: Response){
-        Proveedor.findByIdAndDelete(req.params.id_prov,req.body,(err:Error, proveedor:any)=>{
-            if(err){
-                res.status(401).send(err);
+    public async Delete(req: Request, res: Response){
+
+        const Prov = await super.GetProveedor(req.params.id_prov);
+        const nproducts:number = Prov? await super.NumberOfProductsBySupplier(Prov) : 0;        
+
+        if(nproducts > 0){
+            res.status(200).json({"deleted":false,"message":`El proveedor ${req.params.id_prov} tiene ${nproducts} productos asociados`});
+        }else{
+            if(Prov == undefined){
+                res.status(200).json({"deleted":false,"message":`El proveedor ${req.params.id_prov} No existe`});         
+            }else{
+                Proveedor.findByIdAndDelete(req.params.id_prov,req.body,(err:Error, proveedor:any)=>{
+                    if(err){
+                        res.status(401).send(err);
+                    }
+                    res.status(200).json( proveedor? {"deleted":true, "message":"Sin error"} : {"deleted":false,"message":"Un error ocurrio con el server, vuela a intentar"} );
+                });    
             }
-            res.status(200).json( proveedor? {"deleted":true} : {"deleted":false} );
-        });
+        }        
     }
 
     public NewOne(req: Request, res: Response){
@@ -50,9 +84,12 @@ export class ProveedorService{
             }
             res.status(200).json( proveedor? {"successed":true, "Proveedor": proveedor } : {"successed":false} );
         });
-    }
+    } 
 
-   
+    /////////////////////////////////////////////////////////////
+
+
+    
 
 }
 
