@@ -1,15 +1,18 @@
 import {Request,Response} from "express";
+
 import {Proveedor, IProveedor} from "../models/proveedor.model";
-import { MongooseDocument } from "mongoose";
 import {Producto,IProducts} from "../models/product.model";
+
+import { MongooseDocument } from "mongoose";
 import { resolve } from "dns";
 
 class ProveedorHelpers{
+
     GetProveedor(id_prov: string):Promise<IProveedor>{        
-        return new Promise<IProveedor>( (resolve,rejects) => {
+        return new Promise<IProveedor>( (resolve) => {
             Proveedor.findById(id_prov,(err:Error,proveedor:IProveedor)=>{
                 if(err){
-                    rejects(new Error("ops!"))
+                    console.log(err);
                 }
                 resolve(proveedor);
             }); 
@@ -26,6 +29,7 @@ class ProveedorHelpers{
               }) 
         });
     }
+
 }
 
 export class ProveedorService extends ProveedorHelpers{
@@ -85,11 +89,6 @@ export class ProveedorService extends ProveedorHelpers{
             res.status(200).json( proveedor? {"successed":true, "Proveedor": proveedor } : {"successed":false} );
         });
     } 
-
-    /////////////////////////////////////////////////////////////
-
-
-    
 
 }
 
