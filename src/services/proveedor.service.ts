@@ -6,6 +6,9 @@ import {Producto,IProducts} from "../models/product.model";
 import { MongooseDocument } from "mongoose";
 import { resolve } from "dns";
 
+
+
+
 class ProveedorHelpers{
 
     GetProveedor(id_prov: string):Promise<IProveedor>{        
@@ -19,8 +22,7 @@ class ProveedorHelpers{
         });
     }
 
-    NumberOfProductsBySupplier(prov: IProveedor):Promise<number>{
-        console.log(prov._id);
+    NumberOfProductsBySupplier(prov: IProveedor):Promise<number>{        
         return new Promise<number>( resolve => {
             Producto.aggregate([
                 { "$match": { "proveedor": prov._id }}                

@@ -18,6 +18,4 @@ const ProductoSchema = new mongoose.Schema({
 });
 
 
-
-
 export const Producto = mongoose.model<IProducts>("Producto", ProductoSchema);
